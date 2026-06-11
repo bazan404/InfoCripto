@@ -246,7 +246,7 @@ h2 {
 
 /* ---------- Tablas ---------- */
 .table-wrap { overflow-x: auto; margin-bottom: 14px; }
-.table-wrap.narrow { max-width: 480px; }
+.table-wrap.narrow { max-width: 620px; }
 
 .data-table {
   width: 100%;

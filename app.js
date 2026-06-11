@@ -34,6 +34,13 @@ const COINS = [
 const WINDOW_DAYS = 90;   // ventana estadística (volatilidad, beta, correlaciones)
 const FETCH_DAYS = 365;   // serie descargada: 1 año (los 90 días se recortan de ella)
 
+/* Referencias tradicionales para la matriz de correlaciones, vía proxies
+   tokenizados disponibles en la misma API (sin fuentes ni claves adicionales). */
+const CORR_EXTRAS = [
+  { id: "pax-gold", symbol: "ORO", name: "Oro (PAXG)" },
+  { id: "ishares-core-s-p-500-etf-ondo-tokenized-etf", symbol: "SP500", name: "S&P 500 (ETF tokenizado)" },
+];
+
 /* ---------- Formato ---------- */
 const fmtUSD = (n, opts = {}) =>
   n == null
@@ -211,10 +218,14 @@ function renderRiskTable(markets, series) {
 /* ---------- Matriz de correlaciones ---------- */
 const fmtCorr = (n) => n.toFixed(2).replace(".", ",");
 
-function renderCorrTable(series) {
+function renderCorrTable(assets) {
   const rets = {};
-  for (const coin of COINS) rets[coin.symbol] = logReturns(series[coin.id]);
-  const syms = COINS.map((c) => c.symbol);
+  for (const a of assets) rets[a.symbol] = logReturns(a.prices);
+  const syms = assets.map((a) => a.symbol);
+  const cryptoSyms = COINS.map((c) => c.symbol);
+
+  document.querySelector("#corrTable thead tr").innerHTML =
+    `<th></th>` + syms.map((s) => `<th class="num">${s}</th>`).join("");
 
   const rows = syms.map((rowSym) => {
     const cells = syms.map((colSym) => {
@@ -226,29 +237,50 @@ function renderCorrTable(series) {
   });
   document.querySelector("#corrTable tbody").innerHTML = rows.join("");
 
-  // Lectura analítica: pares extremos y correlación media de la ventana
+  // Lectura analítica: pares extremos y medias intra-cripto / cruzadas
   const pairs = [];
   for (let i = 0; i < syms.length; i++)
     for (let j = i + 1; j < syms.length; j++)
-      pairs.push({ pair: `${syms[i]}–${syms[j]}`, c: correlation(rets[syms[i]], rets[syms[j]]) });
+      pairs.push({
+        a: syms[i],
+        b: syms[j],
+        pair: `${syms[i]}–${syms[j]}`,
+        c: correlation(rets[syms[i]], rets[syms[j]]),
+      });
   const maxP = pairs.reduce((a, b) => (b.c > a.c ? b : a));
   const minP = pairs.reduce((a, b) => (b.c < a.c ? b : a));
-  const avg = mean(pairs.map((p) => p.c));
+
+  const isCrypto = (s) => cryptoSyms.includes(s);
+  const intraPairs = pairs.filter((p) => isCrypto(p.a) && isCrypto(p.b));
+  const crossPairs = pairs.filter((p) => isCrypto(p.a) !== isCrypto(p.b));
+  const intraAvg = mean(intraPairs.map((p) => p.c));
+  const crossAvg = crossPairs.length ? mean(crossPairs.map((p) => p.c)) : null;
+
+  const crossItem =
+    crossAvg == null
+      ? ""
+      : `<li><span>Media cripto–tradicionales</span><strong>${fmtCorr(crossAvg)}</strong></li>`;
+
+  const reading =
+    crossAvg == null
+      ? intraAvg >= 0.7
+        ? "Con correlaciones medias por encima de 0,70, la diversificación intra-cripto aporta poca reducción de riesgo: la cobertura efectiva exige activos externos al ecosistema."
+        : "Correlaciones moderadas dentro del ecosistema, aunque tienden a converger a 1 en episodios de estrés."
+      : crossAvg < 0.4 && intraAvg >= 0.6
+      ? "Los criptoactivos se mueven en bloque entre sí, pero su correlación con oro y S&P 500 es baja: la diversificación efectiva de una cartera cripto proviene de los activos tradicionales, no de combinar criptoactivos."
+      : crossAvg < 0.6
+      ? "La correlación de los criptoactivos con las referencias tradicionales es intermedia: aportan diversificación parcial, menor en episodios de estrés global."
+      : "En la ventana actual los criptoactivos exhiben correlación alta incluso con las referencias tradicionales: el beneficio de diversificación es limitado en todo el espectro.";
 
   document.getElementById("corrInsights").innerHTML = `
     <h3>Lectura de la ventana</h3>
     <ul>
       <li><span>Par más correlacionado</span><strong>${maxP.pair} (${fmtCorr(maxP.c)})</strong></li>
       <li><span>Par menos correlacionado</span><strong>${minP.pair} (${fmtCorr(minP.c)})</strong></li>
-      <li><span>Correlación media</span><strong>${fmtCorr(avg)}</strong></li>
+      <li><span>Media intra-cripto</span><strong>${fmtCorr(intraAvg)}</strong></li>
+      ${crossItem}
     </ul>
-    <p>${
-      avg >= 0.7
-        ? "Con correlaciones medias por encima de 0,70, la diversificación intra-cripto aporta poca reducción de riesgo: la cobertura efectiva exige activos externos al ecosistema."
-        : avg >= 0.4
-        ? "Correlaciones moderadas: existe cierto margen de diversificación dentro del ecosistema, aunque limitado en episodios de estrés, cuando las correlaciones tienden a converger a 1."
-        : "Correlaciones bajas para el estándar del ecosistema: la ventana actual ofrece margen de diversificación inusual entre estos activos."
-    }</p>`;
+    <p>${reading}</p>`;
 }
 
 /* ---------- Series de precios ---------- */
@@ -394,19 +426,20 @@ const TTL_SERIES = 30 * 60 * 1000;   // series de 90 días: 30 min
 async function init() {
   const badge = document.getElementById("liveBadge");
 
-  const [marketsR, globalR, ...chartsR] = await Promise.allSettled([
+  const chartURL = (id) =>
+    `https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=usd&days=${FETCH_DAYS}&interval=daily`;
+
+  const [marketsR, globalR, ...seriesR] = await Promise.allSettled([
     fetchJSONCached(
       "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,binancecoin&order=market_cap_desc&price_change_percentage=24h,7d,30d,1y",
       TTL_MARKETS
     ),
     fetchJSONCached("https://api.coingecko.com/api/v3/global", TTL_MARKETS),
-    ...COINS.map((c) =>
-      fetchJSONCached(
-        `https://api.coingecko.com/api/v3/coins/${c.id}/market_chart?vs_currency=usd&days=${FETCH_DAYS}&interval=daily`,
-        TTL_SERIES
-      )
-    ),
+    ...COINS.map((c) => fetchJSONCached(chartURL(c.id), TTL_SERIES)),
+    ...CORR_EXTRAS.map((x) => fetchJSONCached(chartURL(x.id), TTL_SERIES)),
   ]);
+  const chartsR = seriesR.slice(0, COINS.length);
+  const extrasR = seriesR.slice(COINS.length);
 
   const markets = marketsR.status === "fulfilled" ? marketsR.value : null;
   const global = globalR.status === "fulfilled" ? globalR.value : null;
@@ -435,7 +468,19 @@ async function init() {
   if (global) renderGlobalStats(global);
   if (markets && series) renderRiskTable(markets, series);
   if (series) {
-    renderCorrTable(series);
+    const corrAssets = COINS.map((c) => ({
+      symbol: c.symbol,
+      prices: series[c.id],
+    }));
+    CORR_EXTRAS.forEach((x, i) => {
+      if (extrasR[i].status === "fulfilled") {
+        corrAssets.push({
+          symbol: x.symbol,
+          prices: extrasR[i].value.prices.slice(-(WINDOW_DAYS + 1)).map(([, p]) => p),
+        });
+      }
+    });
+    renderCorrTable(corrAssets);
     renderChartBlocks(seriesRaw);
   }
 
