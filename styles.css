@@ -3,10 +3,13 @@
   --surface: #f4f2ea;
   --surface-alt: #e9e6dc;
   --border: #c8c4b6;
-  --border-strong: #1f2937;
+  --border-strong: #1b2a41;
+  --navy: #1b2a41;
+  --navy-deep: #14213a;
   --text: #1a1d23;
   --text-muted: #5d6470;
   --accent: #1d4ed8;
+  --gold: #c8901a;
   --green: #15803d;
   --red: #b91c1c;
   --serif: "Source Serif 4", Georgia, serif;
@@ -37,8 +40,8 @@ body {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: var(--surface);
-  border-bottom: 2px solid var(--border-strong);
+  background: var(--navy);
+  border-bottom: 3px solid var(--gold);
 }
 
 .header-inner {
@@ -46,80 +49,97 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  height: 54px;
+  height: 56px;
 }
 
 .brand {
   font-family: var(--serif);
   font-weight: 700;
-  font-size: 1rem;
-  letter-spacing: 0.04em;
-  color: var(--text);
+  font-size: 1.25rem;
+  letter-spacing: 0.01em;
+  color: #f5f3ec;
   text-decoration: none;
   white-space: nowrap;
 }
 
-.brand-sub {
-  font-family: var(--sans);
-  font-weight: 400;
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  letter-spacing: 0;
-}
+.brand-accent { color: var(--gold); }
 
 .nav-links { display: flex; gap: 20px; }
 
 .nav-links a {
-  color: var(--text-muted);
+  color: #aab6c9;
   text-decoration: none;
   font-size: 0.82rem;
   font-weight: 500;
 }
 
-.nav-links a:hover { color: var(--accent); text-decoration: underline; }
+.nav-links a:hover { color: #ffffff; text-decoration: underline; }
 
 .status {
   font-family: var(--mono);
   font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.08em;
-  color: var(--green);
+  color: #6fdc8f;
   border: 1px solid currentColor;
   padding: 3px 8px;
   white-space: nowrap;
 }
 
-.status.error { color: var(--red); }
+.status.error { color: #f08a8a; }
 
 /* Cinta de cotizaciones */
-.tape-wrap { border-top: 1px solid var(--border); background: var(--surface-alt); }
+.tape-wrap { background: var(--navy-deep); border-top: 1px solid rgba(255, 255, 255, 0.08); }
 
 .tape {
   font-family: var(--mono);
   font-size: 0.8rem;
-  padding-top: 7px;
-  padding-bottom: 7px;
+  color: #c6cfdd;
+  padding-top: 8px;
+  padding-bottom: 8px;
   overflow-x: auto;
   white-space: nowrap;
   text-align: center;
 }
 
-.tape-item strong { font-weight: 600; }
-.tape-sep { margin: 0 14px; color: var(--border); }
+.tape-item strong { font-weight: 600; color: #f0eee6; }
+.tape-sep { margin: 0 14px; color: rgba(255, 255, 255, 0.2); }
+.tape .up { color: #6fdc8f; }
+.tape .down { color: #f08a8a; }
+
+/* Íconos de monedas */
+.coin-ico {
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  vertical-align: -3px;
+}
 
 /* ---------- Cabecera de informe ---------- */
 .report-head {
   padding: 48px 0 12px;
-  border-bottom: 1px solid var(--border-strong);
+  border-bottom: 2px solid var(--navy);
   margin-bottom: 8px;
 }
 
 h1 {
   font-family: var(--serif);
-  font-size: clamp(1.7rem, 3.5vw, 2.3rem);
+  font-size: clamp(2.2rem, 5vw, 3.1rem);
   font-weight: 700;
-  line-height: 1.2;
-  margin-bottom: 10px;
+  line-height: 1.1;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+
+.title-accent { color: var(--gold); }
+
+.tagline {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+  margin-bottom: 16px;
 }
 
 .report-sub {
@@ -142,12 +162,13 @@ h2 {
   font-family: var(--serif);
   font-size: 1.3rem;
   font-weight: 700;
+  color: var(--navy);
   margin-bottom: 14px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--border);
 }
 
-.sec-num { color: var(--text-muted); margin-right: 4px; }
+.sec-num { color: var(--gold); margin-right: 4px; }
 
 .sec-note {
   font-size: 0.85rem;
@@ -169,6 +190,7 @@ h2 {
 .stat-card {
   padding: 16px 18px;
   border-right: 1px solid var(--border);
+  border-top: 3px solid var(--navy);
 }
 
 .stat-card:last-child { border-right: none; }
@@ -186,6 +208,7 @@ h2 {
   font-family: var(--mono);
   font-size: 1.25rem;
   font-weight: 600;
+  color: var(--navy);
 }
 
 .stat-sub { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
@@ -245,10 +268,12 @@ h2 {
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--text-muted);
-  border-bottom: 2px solid var(--border-strong);
-  background: var(--surface-alt);
+  color: #e8e5dc;
+  border-bottom: 2px solid var(--gold);
+  background: var(--navy);
 }
+
+.data-table thead th .coin-ico { width: 15px; height: 15px; vertical-align: -3px; }
 
 .data-table tbody tr:last-child td { border-bottom: none; }
 .data-table tbody tr:nth-child(even) td { background: #edebe2; }
@@ -269,7 +294,7 @@ h2 {
 
 .corr-insights {
   border: 1px solid var(--border);
-  border-left: 2px solid var(--border-strong);
+  border-left: 3px solid var(--gold);
   background: var(--surface-alt);
   padding: 16px 20px;
   font-size: 0.84rem;
@@ -278,6 +303,7 @@ h2 {
 .corr-insights h3 {
   font-family: var(--serif);
   font-size: 0.95rem;
+  color: var(--navy);
   margin-bottom: 10px;
 }
 
@@ -305,6 +331,7 @@ h2 {
 
 .chart-block {
   border: 1px solid var(--border);
+  border-top: 3px solid var(--navy);
   background: var(--surface);
   padding: 14px 18px 18px;
 }
@@ -315,6 +342,8 @@ h2 {
   margin-bottom: 10px;
   font-family: var(--mono);
 }
+
+.chart-block figcaption strong { color: var(--navy); }
 
 .chart-canvas { height: 230px; position: relative; }
 
@@ -348,10 +377,11 @@ h2 {
 /* ---------- Footer ---------- */
 .site-footer {
   margin-top: 48px;
-  border-top: 2px solid var(--border-strong);
+  background: var(--navy);
+  border-top: 3px solid var(--gold);
   padding: 24px 0 36px;
   font-size: 0.8rem;
-  color: var(--text-muted);
+  color: #aab6c9;
 }
 
 .site-footer p { max-width: 90ch; margin-bottom: 10px; }

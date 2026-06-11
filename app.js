@@ -130,6 +130,7 @@ function renderTape(markets) {
   document.getElementById("tape").innerHTML = COINS.map((coin) => {
     const m = markets.find((x) => x.id === coin.id);
     return `<span class="tape-item">
+        <img class="coin-ico" src="${m.image}" alt="${coin.name}" />
         <strong>${coin.symbol}</strong> ${fmtUSD(m.current_price)}
         <span class="${pctClass(m.price_change_percentage_24h)}">${fmtPct(m.price_change_percentage_24h)}</span>
       </span>`;
@@ -193,7 +194,7 @@ function renderRiskTable(markets, series) {
     const b = coin.id === "bitcoin" ? 1 : beta(rets, btcReturns);
     return `
       <tr>
-        <td><strong>${coin.symbol}</strong> <span class="muted-inline">${coin.name}</span></td>
+        <td><img class="coin-ico" src="${m.image}" alt="" /> <strong>${coin.symbol}</strong> <span class="muted-inline">${coin.name}</span></td>
         <td class="num">${fmtUSD(m.current_price)}</td>
         <td class="num ${pctClass(m.price_change_percentage_24h)}">${fmtPct(m.price_change_percentage_24h)}</td>
         <td class="num ${pctClass(m.price_change_percentage_7d_in_currency)}">${fmtPct(m.price_change_percentage_7d_in_currency)}</td>
@@ -307,11 +308,11 @@ function renderChartBlocks(seriesRaw) {
     (coin) => `
     <div class="chart-pair">
       <figure class="chart-block">
-        <figcaption><strong>${coin.symbol}</strong> — ${coin.name}, cierre diario USD (${WINDOW_DAYS} d)</figcaption>
+        <figcaption>${coin.icon ? `<img class="coin-ico" src="${coin.icon}" alt="" /> ` : ""}<strong>${coin.symbol}</strong> — ${coin.name}, cierre diario USD (${WINDOW_DAYS} d)</figcaption>
         <div class="chart-canvas"><canvas id="chart-${coin.id}-90"></canvas></div>
       </figure>
       <figure class="chart-block">
-        <figcaption><strong>${coin.symbol}</strong> — ${coin.name}, cierre diario USD (1 año)</figcaption>
+        <figcaption>${coin.icon ? `<img class="coin-ico" src="${coin.icon}" alt="" /> ` : ""}<strong>${coin.symbol}</strong> — ${coin.name}, cierre diario USD (1 año)</figcaption>
         <div class="chart-canvas"><canvas id="chart-${coin.id}-1y"></canvas></div>
       </figure>
     </div>`
@@ -328,6 +329,15 @@ function renderChartBlocks(seriesRaw) {
 function renderCompareTable(markets) {
   const get = (id) => markets.find((m) => m.id === id);
   const ms = [get("bitcoin"), get("ethereum"), get("binancecoin")];
+
+  document.querySelector("#compareTable thead tr").innerHTML =
+    `<th>Métrica</th>` +
+    ms
+      .map(
+        (m) =>
+          `<th class="num"><img class="coin-ico" src="${m.image}" alt="" /> ${m.name} (${m.symbol.toUpperCase()})</th>`
+      )
+      .join("");
 
   const rows = [
     ["Capitalización", ...ms.map((m) => `$${fmtCompact(m.market_cap)}`)],
@@ -415,6 +425,10 @@ async function init() {
 
   // Render parcial: cada bloque se pinta con los datos que estén disponibles
   if (markets) {
+    COINS.forEach((c) => {
+      const m = markets.find((x) => x.id === c.id);
+      if (m) c.icon = m.image;
+    });
     renderTape(markets);
     renderCompareTable(markets);
   }
