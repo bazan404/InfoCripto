@@ -3,201 +3,194 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CriptoEconomía — Análisis de Bitcoin, Ethereum y BNB</title>
-  <meta name="description" content="Análisis económico de criptomonedas para profesionales: Bitcoin, Ethereum y BNB con índices de mercado en tiempo real." />
+  <title>CriptoEconomía — Monitor estadístico de criptoactivos</title>
+  <meta name="description" content="Monitor estadístico de Bitcoin, Ethereum y BNB para analistas económicos y financieros: retornos, volatilidad, correlaciones, beta y métricas de mercado en tiempo real." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
   <header class="site-header">
-    <nav class="nav container">
-      <a href="#" class="brand">
-        <span class="brand-mark">₿</span>
-        <span class="brand-name">Cripto<strong>Economía</strong></span>
-      </a>
-      <ul class="nav-links">
-        <li><a href="#mercado">Mercado global</a></li>
-        <li><a href="#activos">Activos</a></li>
-        <li><a href="#comparativa">Comparativa</a></li>
-        <li><a href="#indices">Índices</a></li>
-        <li><a href="#glosario">Glosario</a></li>
-      </ul>
-      <span class="live-badge" id="liveBadge"><span class="dot"></span> Datos en vivo</span>
-    </nav>
+    <div class="container header-inner">
+      <a href="#" class="brand">CRIPTOECONOMÍA <span class="brand-sub">/ Monitor estadístico</span></a>
+      <nav class="nav-links">
+        <a href="#resumen">Resumen</a>
+        <a href="#retornos">Retornos y riesgo</a>
+        <a href="#correlaciones">Correlaciones</a>
+        <a href="#series">Series</a>
+        <a href="#fundamentos">Fundamentos</a>
+        <a href="#metodologia">Metodología</a>
+      </nav>
+      <span class="status" id="liveBadge">DATOS EN VIVO</span>
+    </div>
+    <div class="tape-wrap">
+      <div class="container tape" id="tape" aria-live="polite">Cargando cotizaciones…</div>
+    </div>
   </header>
 
-  <main>
-    <!-- HERO -->
-    <section class="hero">
-      <div class="container hero-grid">
-        <div class="hero-copy">
-          <p class="eyebrow">Informe de mercado · Actualización automática</p>
-          <h1>Criptoactivos bajo la lupa <span class="accent">económica</span></h1>
-          <p class="lead">
-            Panel de análisis de <strong>Bitcoin</strong>, <strong>Ethereum</strong> y <strong>BNB</strong>
-            orientado a profesionales de la economía y las finanzas: capitalización, liquidez,
-            dominancia, oferta monetaria y sentimiento de mercado, con datos en tiempo real.
-          </p>
-          <div class="hero-meta">
-            <span id="lastUpdate">Cargando datos…</span>
-          </div>
+  <main class="container">
+    <!-- CABECERA DE INFORME -->
+    <section class="report-head">
+      <h1>Monitor estadístico de criptoactivos</h1>
+      <p class="report-sub">
+        Bitcoin · Ethereum · BNB — Retornos, volatilidad, correlaciones y agregados de mercado
+        para análisis económico y financiero. Frecuencia diaria, ventana de 90 días.
+      </p>
+      <p class="report-meta" id="lastUpdate">Cargando datos…</p>
+    </section>
+
+    <!-- 1. RESUMEN DE MERCADO -->
+    <section id="resumen" class="section">
+      <h2><span class="sec-num">1.</span> Agregados de mercado</h2>
+      <div class="stats-grid" id="globalStats"></div>
+      <div class="inline-indices">
+        <div class="inline-index">
+          <span class="ii-label">Sentimiento (Fear &amp; Greed)</span>
+          <span class="ii-value" id="fngValue">–</span>
+          <span class="ii-note" id="fngLabel">Cargando</span>
         </div>
-        <div class="hero-tickers" id="heroTickers" aria-live="polite">
-          <!-- tickers inyectados por JS -->
+        <div class="inline-index">
+          <span class="ii-label">Dominancia BTC</span>
+          <span class="ii-value" id="btcDominance">–</span>
+          <span class="ii-note">Proxy de aversión al riesgo intra-mercado</span>
+        </div>
+        <div class="inline-index">
+          <span class="ii-label">Rotación (Vol. 24h / Cap.)</span>
+          <span class="ii-value" id="volMcapRatio">–</span>
+          <span class="ii-note">Análogo al turnover ratio accionario</span>
         </div>
       </div>
     </section>
 
-    <!-- INDICADORES GLOBALES -->
-    <section id="mercado" class="section">
-      <div class="container">
-        <div class="section-head">
-          <h2>Indicadores macro del mercado cripto</h2>
-          <p>Variables agregadas equivalentes a los indicadores monetarios tradicionales.</p>
-        </div>
-        <div class="stats-grid" id="globalStats">
-          <!-- stats inyectados por JS -->
-        </div>
+    <!-- 2. RETORNOS Y RIESGO -->
+    <section id="retornos" class="section">
+      <h2><span class="sec-num">2.</span> Matriz de retornos y riesgo</h2>
+      <p class="sec-note">
+        Retornos simples sobre precios de cierre en USD. Volatilidad: desviación estándar de
+        retornos logarítmicos diarios (90 días), anualizada con √365. Drawdown máximo y beta
+        calculados sobre la misma ventana.
+      </p>
+      <div class="table-wrap">
+        <table class="data-table" id="riskTable">
+          <thead>
+            <tr>
+              <th>Activo</th>
+              <th class="num">Precio (USD)</th>
+              <th class="num">24 h</th>
+              <th class="num">7 d</th>
+              <th class="num">30 d</th>
+              <th class="num">1 año</th>
+              <th class="num">Vol. anualiz.</th>
+              <th class="num">Drawdown máx. (90 d)</th>
+              <th class="num">Beta vs BTC</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="9" class="loading-row">Cargando datos…</td></tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
-    <!-- ACTIVOS -->
-    <section id="activos" class="section section-alt">
-      <div class="container">
-        <div class="section-head">
-          <h2>Análisis por activo</h2>
-          <p>Perfil económico, política monetaria del protocolo y evolución de precio (30 días).</p>
-        </div>
-        <div id="coinSections">
-          <!-- secciones de monedas inyectadas por JS -->
-        </div>
+    <!-- 3. CORRELACIONES -->
+    <section id="correlaciones" class="section">
+      <h2><span class="sec-num">3.</span> Matriz de correlaciones</h2>
+      <p class="sec-note">
+        Correlación de Pearson entre retornos logarítmicos diarios (90 días). Valores próximos a 1
+        indican escaso beneficio de diversificación dentro del ecosistema.
+      </p>
+      <div class="table-wrap narrow">
+        <table class="data-table" id="corrTable">
+          <thead>
+            <tr><th></th><th class="num">BTC</th><th class="num">ETH</th><th class="num">BNB</th></tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="4" class="loading-row">Cargando datos…</td></tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
-    <!-- COMPARATIVA -->
-    <section id="comparativa" class="section">
-      <div class="container">
-        <div class="section-head">
-          <h2>Tabla comparativa</h2>
-          <p>Métricas clave lado a lado para evaluación relativa.</p>
-        </div>
-        <div class="table-wrap">
-          <table class="compare-table" id="compareTable">
-            <thead>
-              <tr>
-                <th>Métrica</th>
-                <th>Bitcoin (BTC)</th>
-                <th>Ethereum (ETH)</th>
-                <th>BNB</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td colspan="4" class="loading-row">Cargando datos…</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+    <!-- 4. SERIES DE PRECIOS -->
+    <section id="series" class="section">
+      <h2><span class="sec-num">4.</span> Series de precios — 90 días</h2>
+      <p class="sec-note">Precio de cierre diario en USD, escala lineal. Fuente: CoinGecko.</p>
+      <div id="chartBlocks"></div>
     </section>
 
-    <!-- ÍNDICES -->
-    <section id="indices" class="section section-alt">
-      <div class="container">
-        <div class="section-head">
-          <h2>Índices económicos del ecosistema</h2>
-          <p>Lecturas de sentimiento y concentración utilizadas en el análisis del ciclo de mercado.</p>
-        </div>
-        <div class="indices-grid">
-          <article class="index-card">
-            <h3>Índice de Miedo y Codicia</h3>
-            <div class="gauge-wrap">
-              <div class="gauge" id="fngGauge">
-                <span class="gauge-value" id="fngValue">–</span>
-                <span class="gauge-label" id="fngLabel">Cargando</span>
-              </div>
-            </div>
-            <p>
-              Indicador compuesto (volatilidad, momentum, volumen, redes sociales y dominancia)
-              que mide el sentimiento agregado. Valores extremos suelen interpretarse de forma
-              contraria: codicia extrema como señal de sobrecompra y miedo extremo como
-              oportunidad de entrada, análogo a los índices de confianza del consumidor.
-            </p>
-            <small>Fuente: alternative.me</small>
-          </article>
-          <article class="index-card">
-            <h3>Dominancia de Bitcoin</h3>
-            <div class="big-number" id="btcDominance">–</div>
-            <p>
-              Participación de Bitcoin sobre la capitalización total del mercado. Funciona como
-              proxy de aversión al riesgo dentro del ecosistema: una dominancia creciente indica
-              rotación hacia el activo considerado más seguro (flight to quality), mientras que
-              su caída suele coincidir con apetito por activos de mayor beta (altcoins).
-            </p>
-            <small>Fuente: CoinGecko</small>
-          </article>
-          <article class="index-card">
-            <h3>Ratio volumen / capitalización</h3>
-            <div class="big-number" id="volMcapRatio">–</div>
-            <p>
-              Mide la rotación diaria del mercado: qué porcentaje de la capitalización total se
-              negocia en 24 horas. Es un indicador de liquidez y profundidad de mercado,
-              comparable al turnover ratio de los mercados accionarios. Valores elevados
-              acompañan fases de alta volatilidad y descubrimiento de precios.
-            </p>
-            <small>Cálculo propio sobre datos de CoinGecko</small>
-          </article>
-        </div>
+    <!-- 5. FUNDAMENTOS -->
+    <section id="fundamentos" class="section">
+      <h2><span class="sec-num">5.</span> Fundamentos y política monetaria</h2>
+      <div class="table-wrap">
+        <table class="data-table" id="compareTable">
+          <thead>
+            <tr>
+              <th>Métrica</th>
+              <th class="num">Bitcoin (BTC)</th>
+              <th class="num">Ethereum (ETH)</th>
+              <th class="num">BNB</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="4" class="loading-row">Cargando datos…</td></tr>
+          </tbody>
+        </table>
       </div>
+      <div class="fund-notes" id="fundNotes"></div>
     </section>
 
-    <!-- GLOSARIO -->
-    <section id="glosario" class="section">
-      <div class="container">
-        <div class="section-head">
-          <h2>Glosario para el analista</h2>
-          <p>Equivalencias conceptuales entre métricas cripto y económicas tradicionales.</p>
+    <!-- 6. METODOLOGÍA -->
+    <section id="metodologia" class="section">
+      <h2><span class="sec-num">6.</span> Metodología y definiciones</h2>
+      <dl class="method-list">
+        <div>
+          <dt>Retornos</dt>
+          <dd>Variaciones simples de precio de cierre (24 h, 7 d, 30 d y 1 año) reportadas por CoinGecko sobre pares contra USD.</dd>
         </div>
-        <div class="glossary-grid">
-          <div class="glossary-item">
-            <h4>Capitalización de mercado</h4>
-            <p>Precio × oferta circulante. Equivalente al valor de mercado de una compañía o, a nivel agregado, a un proxy del M2 del ecosistema.</p>
-          </div>
-          <div class="glossary-item">
-            <h4>Oferta circulante / máxima</h4>
-            <p>Unidades en circulación frente al tope de emisión del protocolo. Define la política monetaria del activo: Bitcoin tiene oferta rígida (21 M), ETH y BNB políticas dinámicas.</p>
-          </div>
-          <div class="glossary-item">
-            <h4>Halving</h4>
-            <p>Reducción programada del 50% en la emisión de nuevos bitcoins cada ~4 años. Un shock de oferta predecible, sin equivalente en la política monetaria tradicional.</p>
-          </div>
-          <div class="glossary-item">
-            <h4>Quema de tokens (burn)</h4>
-            <p>Destrucción permanente de unidades (EIP-1559 en Ethereum, quemas trimestrales de BNB). Política deflacionaria comparable a la recompra y amortización de acciones.</p>
-          </div>
-          <div class="glossary-item">
-            <h4>Staking yield</h4>
-            <p>Rendimiento por inmovilizar capital para asegurar la red (ETH ~3-4% anual). Funciona como una "tasa libre de riesgo" interna del ecosistema.</p>
-          </div>
-          <div class="glossary-item">
-            <h4>Volatilidad realizada</h4>
-            <p>Desviación estándar de los retornos. Los criptoactivos exhiben volatilidades de 3 a 5 veces las de los índices accionarios, lo que condiciona su ponderación en carteras.</p>
-          </div>
+        <div>
+          <dt>Volatilidad anualizada</dt>
+          <dd>σ de retornos logarítmicos diarios sobre 90 observaciones, multiplicada por √365 (los criptoactivos cotizan en continuo, sin días hábiles).</dd>
         </div>
-      </div>
+        <div>
+          <dt>Drawdown máximo</dt>
+          <dd>Mayor caída porcentual entre un máximo y el mínimo posterior dentro de la ventana de 90 días.</dd>
+        </div>
+        <div>
+          <dt>Beta vs BTC</dt>
+          <dd>Cov(rᵢ, r_BTC) / Var(r_BTC) sobre retornos logarítmicos diarios (90 días). BTC se toma como factor sistemático del mercado cripto.</dd>
+        </div>
+        <div>
+          <dt>Correlación</dt>
+          <dd>Coeficiente de Pearson entre retornos logarítmicos diarios de cada par de activos (90 días).</dd>
+        </div>
+        <div>
+          <dt>Dominancia BTC</dt>
+          <dd>Capitalización de Bitcoin sobre la capitalización agregada. Lectura creciente: rotación hacia el activo de menor beta (flight to quality).</dd>
+        </div>
+        <div>
+          <dt>Rotación (turnover)</dt>
+          <dd>Volumen negociado en 24 h sobre capitalización total. Indicador de liquidez y profundidad, comparable al turnover de mercados accionarios.</dd>
+        </div>
+        <div>
+          <dt>Fear &amp; Greed</dt>
+          <dd>Índice compuesto (volatilidad, momentum, volumen, redes, dominancia) de alternative.me, escala 0–100. Lecturas extremas suelen interpretarse de forma contraria.</dd>
+        </div>
+      </dl>
     </section>
   </main>
 
   <footer class="site-footer">
-    <div class="container footer-grid">
-      <div>
-        <p class="brand-name">Cripto<strong>Economía</strong></p>
-        <p class="muted">Panel informativo para profesionales de la economía. Los datos se obtienen de APIs públicas (CoinGecko, alternative.me) y pueden presentar demoras.</p>
-      </div>
-      <p class="muted disclaimer">
-        Este sitio tiene fines exclusivamente informativos y educativos. No constituye asesoramiento
-        financiero ni recomendación de inversión. Los criptoactivos son instrumentos de alta volatilidad.
+    <div class="container">
+      <p>
+        <strong>Fuentes:</strong> CoinGecko (precios, capitalización, volumen) y alternative.me
+        (sentimiento). Datos con posible demora; cálculos propios sobre series públicas.
+      </p>
+      <p class="disclaimer">
+        Documento exclusivamente informativo y educativo. No constituye asesoramiento financiero ni
+        recomendación de inversión. Los criptoactivos exhiben volatilidades varias veces superiores
+        a las de los activos tradicionales.
       </p>
     </div>
   </footer>
