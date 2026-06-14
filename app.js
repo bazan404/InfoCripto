@@ -283,17 +283,21 @@ function renderCorrTable(assets) {
     <p>${reading}</p>`;
 }
 
-/* ---------- Series de precios ---------- */
+/* ---------- Series de precios (interactivas) ---------- */
 function drawPriceChart(canvasId, points, color, maxTicks, labelOpts) {
   const ctx = document.getElementById(canvasId);
-  if (!ctx) return;
+  if (!ctx) return null;
 
   const labels = points.map(([ts]) =>
     new Date(ts).toLocaleDateString("es-ES", labelOpts || { day: "numeric", month: "short" })
   );
   const values = points.map(([, p]) => p);
 
-  new Chart(ctx, {
+  const grad = ctx.getContext("2d").createLinearGradient(0, 0, 0, 230);
+  grad.addColorStop(0, color + "33");
+  grad.addColorStop(1, color + "00");
+
+  return new Chart(ctx, {
     type: "line",
     data: {
       labels,
@@ -301,20 +305,30 @@ function drawPriceChart(canvasId, points, color, maxTicks, labelOpts) {
         {
           data: values,
           borderColor: color,
-          borderWidth: 1.5,
+          borderWidth: 2,
           pointRadius: 0,
-          tension: 0,
-          fill: false,
+          pointHoverRadius: 4,
+          pointHoverBackgroundColor: color,
+          tension: 0.15,
+          fill: true,
+          backgroundColor: grad,
         },
       ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      animation: false,
+      animation: { duration: 350 },
+      interaction: { mode: "index", intersect: false },
       plugins: {
         legend: { display: false },
-        tooltip: { callbacks: { label: (c) => fmtUSD(c.parsed.y) } },
+        tooltip: {
+          backgroundColor: "#14213a",
+          padding: 10,
+          titleColor: "#c6cfdd",
+          bodyColor: "#fff",
+          callbacks: { label: (c) => fmtUSD(c.parsed.y) },
+        },
       },
       scales: {
         x: {
@@ -334,27 +348,109 @@ function drawPriceChart(canvasId, points, color, maxTicks, labelOpts) {
   });
 }
 
-function renderChartBlocks(seriesRaw) {
-  const container = document.getElementById("chartBlocks");
-  container.innerHTML = COINS.map(
-    (coin) => `
+let activeSeriesCoin = "bitcoin";
+let activeSeriesCharts = [];
+let lastSeriesRaw = null;
+let lastMarkets = null;
+
+function renderSeriesSection(seriesRaw, markets) {
+  lastSeriesRaw = seriesRaw;
+  if (markets) lastMarkets = markets;
+
+  const tabs = document.getElementById("seriesTabs");
+  tabs.innerHTML = COINS.map((coin) => {
+    const m = lastMarkets && lastMarkets.find((x) => x.id === coin.id);
+    const chg = m ? m.price_change_percentage_24h : null;
+    const active = coin.id === activeSeriesCoin;
+    return `
+      <button class="series-tab ${active ? "active" : ""}" data-coin="${coin.id}"
+              role="tab" aria-selected="${active}" style="--coin-color:${coin.color}">
+        ${coin.icon ? `<img class="coin-ico" src="${coin.icon}" alt="" />` : ""}
+        <span class="st-text">
+          <span class="st-sym">${coin.symbol}</span>
+          <span class="st-name">${coin.name}</span>
+        </span>
+        ${
+          m
+            ? `<span class="st-price">${fmtUSD(m.current_price)}</span>
+               <span class="st-chg ${pctClass(chg)}">${fmtPct(chg)}</span>`
+            : ""
+        }
+      </button>`;
+  }).join("");
+
+  tabs.querySelectorAll(".series-tab").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (btn.dataset.coin === activeSeriesCoin) return;
+      activeSeriesCoin = btn.dataset.coin;
+      tabs.querySelectorAll(".series-tab").forEach((b) => {
+        const on = b.dataset.coin === activeSeriesCoin;
+        b.classList.toggle("active", on);
+        b.setAttribute("aria-selected", on);
+      });
+      drawActiveSeries();
+    });
+  });
+
+  drawActiveSeries();
+}
+
+function drawActiveSeries() {
+  activeSeriesCharts.forEach((c) => c && c.destroy());
+  activeSeriesCharts = [];
+
+  const coin = COINS.find((c) => c.id === activeSeriesCoin);
+  const points = lastSeriesRaw && lastSeriesRaw[coin.id];
+  const panel = document.getElementById("seriesPanel");
+  if (!points) {
+    panel.innerHTML = `<div class="chart-skeleton">Sin datos disponibles para ${coin.name}.</div>`;
+    return;
+  }
+
+  const m = lastMarkets && lastMarkets.find((x) => x.id === coin.id);
+  const chips = m
+    ? [
+        ["24 h", m.price_change_percentage_24h],
+        ["7 d", m.price_change_percentage_7d_in_currency],
+        ["30 d", m.price_change_percentage_30d_in_currency],
+        ["1 año", m.price_change_percentage_1y_in_currency],
+      ]
+        .map(
+          ([k, v]) =>
+            `<span class="ss-chip"><span class="ssc-k">${k}</span><span class="ssc-v ${pctClass(v)}">${fmtPct(v, 1)}</span></span>`
+        )
+        .join("")
+    : "";
+
+  panel.innerHTML = `
+    <div class="series-summary" style="--coin-color:${coin.color}">
+      <div class="ss-head">
+        ${coin.icon ? `<img src="${coin.icon}" alt="${coin.name}" />` : ""}
+        <div>
+          <div class="ss-name">${coin.name}</div>
+          <div class="ss-sym">${coin.symbol}</div>
+        </div>
+      </div>
+      ${m ? `<div class="ss-price">${fmtUSD(m.current_price)}</div>` : ""}
+      <div class="ss-chips">${chips}</div>
+    </div>
     <div class="chart-pair">
       <figure class="chart-block">
-        <figcaption>${coin.icon ? `<img class="coin-ico" src="${coin.icon}" alt="" /> ` : ""}<strong>${coin.symbol}</strong> — ${coin.name}, cierre diario USD (${WINDOW_DAYS} d)</figcaption>
-        <div class="chart-canvas"><canvas id="chart-${coin.id}-90"></canvas></div>
+        <figcaption>Últimos ${WINDOW_DAYS} días — cierre diario USD</figcaption>
+        <div class="chart-canvas"><canvas id="chart-active-90"></canvas></div>
       </figure>
       <figure class="chart-block">
-        <figcaption>${coin.icon ? `<img class="coin-ico" src="${coin.icon}" alt="" /> ` : ""}<strong>${coin.symbol}</strong> — ${coin.name}, cierre diario USD (1 año)</figcaption>
-        <div class="chart-canvas"><canvas id="chart-${coin.id}-1y"></canvas></div>
+        <figcaption>Último año — cierre diario USD</figcaption>
+        <div class="chart-canvas"><canvas id="chart-active-1y"></canvas></div>
       </figure>
-    </div>`
-  ).join("");
+    </div>`;
 
-  for (const coin of COINS) {
-    const points = seriesRaw[coin.id];
-    drawPriceChart(`chart-${coin.id}-90`, points.slice(-(WINDOW_DAYS + 1)), coin.color, 9);
-    drawPriceChart(`chart-${coin.id}-1y`, points, coin.color, 12, { month: "short", year: "2-digit" });
-  }
+  activeSeriesCharts.push(
+    drawPriceChart("chart-active-90", points.slice(-(WINDOW_DAYS + 1)), coin.color, 9)
+  );
+  activeSeriesCharts.push(
+    drawPriceChart("chart-active-1y", points, coin.color, 12, { month: "short", year: "2-digit" })
+  );
 }
 
 /* ---------- Fundamentos ---------- */
@@ -481,7 +577,7 @@ async function init() {
       }
     });
     renderCorrTable(corrAssets);
-    renderChartBlocks(seriesRaw);
+    renderSeriesSection(seriesRaw, markets);
   }
 
   const allOk = markets && global && chartsOk;

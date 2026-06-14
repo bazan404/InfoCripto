@@ -122,9 +122,14 @@
 
     <!-- 4. SERIES DE PRECIOS -->
     <section id="series" class="section">
-      <h2><span class="sec-num">4.</span> Series de precios — 90 días y 1 año</h2>
-      <p class="sec-note">Precio de cierre diario en USD, escala lineal. Panel izquierdo: ventana estadística de 90 días; panel derecho: perspectiva de 1 año. Fuente: CoinGecko.</p>
-      <div id="chartBlocks"></div>
+      <h2><span class="sec-num">4.</span> Series de precios interactivas</h2>
+      <p class="sec-note">Seleccioná un criptoactivo para explorar su evolución de precio. Cierre diario en USD, escala lineal: a la izquierda la ventana estadística de 90 días; a la derecha la perspectiva de 1 año. Fuente: CoinGecko.</p>
+      <div class="series-tabs" id="seriesTabs" role="tablist" aria-label="Seleccionar criptoactivo">
+        <span class="loading-row">Cargando opciones…</span>
+      </div>
+      <div id="seriesPanel" class="series-panel" aria-live="polite">
+        <div class="chart-skeleton">Cargando series…</div>
+      </div>
     </section>
 
     <!-- 5. FUNDAMENTOS -->
