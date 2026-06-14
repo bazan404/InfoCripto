@@ -153,18 +153,43 @@ body {
   vertical-align: -3px;
 }
 
-/* ---------- Cabecera de informe ---------- */
-.report-head {
-  padding: 52px 0 18px;
+/* ---------- Hero / introducción ---------- */
+.hero {
+  padding: 56px 0 26px;
   margin-bottom: 8px;
   border-bottom: 1px solid var(--border);
 }
 
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--navy);
+  background: rgba(27, 42, 65, 0.07);
+  border: 1px solid rgba(27, 42, 65, 0.14);
+  border-radius: 999px;
+  padding: 6px 14px;
+  margin-bottom: 18px;
+}
+
+.hero-badge::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
 h1 {
   font-family: var(--serif);
-  font-size: clamp(2.4rem, 5.5vw, 3.4rem);
+  font-size: clamp(2.6rem, 6vw, 3.8rem);
   font-weight: 700;
-  line-height: 1.05;
+  line-height: 1.02;
+  letter-spacing: -0.01em;
   color: var(--navy);
   margin-bottom: 4px;
 }
@@ -177,20 +202,53 @@ h1 {
   text-transform: uppercase;
   letter-spacing: 0.14em;
   color: var(--text-muted);
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
-.report-sub {
+.hero-intro {
   color: var(--text-muted);
-  max-width: 75ch;
-  margin-bottom: 14px;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  max-width: 68ch;
+  margin-bottom: 26px;
 }
+
+.hero-intro strong { color: var(--text); font-weight: 600; }
+
+.hero-highlights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.hl-card {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-decoration: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 14px 16px;
+  border-left: 3px solid var(--gold);
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+
+.hl-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+  border-left-color: var(--navy);
+}
+
+.hl-title { font-weight: 600; font-size: 0.92rem; color: var(--navy); }
+.hl-desc { font-size: 0.78rem; color: var(--text-muted); }
 
 .report-meta {
   font-family: var(--mono);
   font-size: 0.75rem;
   color: var(--text-muted);
-  padding-bottom: 14px;
 }
 
 /* ---------- Secciones ---------- */
